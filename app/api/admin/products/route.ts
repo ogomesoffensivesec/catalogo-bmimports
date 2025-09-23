@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "unauthorized" }, { status: 401 })
 
   const body = await req.json()
-  const { images = [], orderIndex: _ignored, ...data } = body as any
+  const { images = [], ...data } = body as any
 
   // Calcula próximo orderIndex (por variante) dentro de uma transação
   const created = await prisma.$transaction(async (tx: any) => {

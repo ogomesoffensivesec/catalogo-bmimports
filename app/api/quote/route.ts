@@ -1,8 +1,8 @@
-// src/app/api/public/quotes/route.ts
+// app/api/quote/route.ts
 import { NextRequest } from "next/server"
 import { z } from "zod"
 import { prisma } from "@/lib/prisma"
-import { safeJson } from "@/lib/safe-json" // aquele helper que converte BigInt/Decimal
+import { safeJson } from "@/lib/safe-json"
 
 const QuoteSchema = z.object({
   customerName: z.string().min(1),
@@ -18,8 +18,11 @@ const QuoteSchema = z.object({
     qty: z.number().int().min(1),
     image: z.string().url().optional(),
   })).min(1),
-  notes: z.string().optional(),
+  notes: z.string().optional(), // <- campo do payload
 })
+
+type QuotePayload = z.infer<typeof QuoteSchema>
+type QuoteItemInput = QuotePayload["items"][number]
 
 export async function POST(req: NextRequest) {
   const json = await req.json()
@@ -30,7 +33,7 @@ export async function POST(req: NextRequest) {
 
   const { items, ...data } = parsed.data
 
-  const quote = await prisma.$transaction(async (tx:any) => {
+  const quote = await prisma.$transaction(async (tx) => {
     const q = await tx.quote.create({
       data: {
         customerName: data.customerName,
@@ -38,12 +41,12 @@ export async function POST(req: NextRequest) {
         customerPhone: data.customerPhone ?? null,
         company: data.company ?? null,
         variant: data.variant,
-        notes: data.notes ?? null,
+        note: data.notes ?? null, // <- mapeia 'notes' do payload para 'note' do Prisma
       },
     })
 
     await tx.quoteItem.createMany({
-      data: items.map((it, idx) => ({
+      data: items.map((it: QuoteItemInput, idx: number) => ({
         quoteId: Number(q.id),
         sku: it.sku,
         name: it.name,
@@ -57,5 +60,5 @@ export async function POST(req: NextRequest) {
     return q
   })
 
-  return safeJson({ ok: true, id: quote.id }) // safeJson lida com BigInt
+  return safeJson({ ok: true, id: quote.id })
 }

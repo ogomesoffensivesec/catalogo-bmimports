@@ -1,42 +1,61 @@
-import type { NextAuthOptions } from "next-auth"
+// lib/auth.ts
+import type { NextAuthOptions, DefaultSession } from "next-auth"
 import Credentials from "next-auth/providers/credentials"
-import { PrismaAdapter } from "@auth/prisma-adapter"
+import type { JWT } from "next-auth/jwt"
 import { prisma } from "./prisma"
 import bcrypt from "bcrypt"
-import { Adapter } from "next-auth/adapters"
-import { z } from "zod"
+
+declare module "next-auth" {
+  interface Session {
+    user: DefaultSession["user"] & { id?: string }
+  }
+  interface User {
+    id: string
+    email: string
+    name?: string | null
+  }
+}
+
+declare module "next-auth/jwt" {
+  interface JWT {
+    uid?: string
+  }
+}
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as Adapter,
   session: { strategy: "jwt" },
-  pages: { signIn: "/signin" },
   providers: [
     Credentials({
-      name: "credentials",
+      name: "Credentials",
       credentials: {
         email: { label: "E-mail", type: "email" },
-        password: { label: "Senha", type: "password" }
+        password: { label: "Senha", type: "password" },
       },
       async authorize(credentials) {
-        const schema = z.object({ email: z.string().email(), password: z.string().min(3) })
-        const parsed = schema.safeParse(credentials)
-        if (!parsed.success) return null
-        const user = await prisma.user.findUnique({ where: { email: parsed.data.email } })
-        if (!user?.passwordHash) return null
-        const ok = await bcrypt.compare(parsed.data.password, user.passwordHash)
+        const email = credentials?.email
+        const password = credentials?.password
+        if (!email || !password) return null
+
+        const user = await prisma.user.findUnique({ where: { email } })
+        if (!user) return null
+
+        const ok = await bcrypt.compare(password, user.passwordHash)
         if (!ok) return null
-        return { id: user.id, name: user.name ?? "", email: user.email ?? "", role: user.role } as any
-      }
-    })
+
+        return { id: String(user.id), email: user.email, name: user.name ?? undefined }
+      },
+    }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) token.role = (user as any).role || "marketing"
+    async jwt({ token, user }): Promise<JWT> {
+      if (user) token.uid = (user as { id: string }).id
       return token
     },
     async session({ session, token }) {
-      (session as any).user.role = token.role
+      if (session.user) {
+        session.user.id = typeof token.uid === "string" ? token.uid : undefined
+      }
       return session
-    }
-  }
+    },
+  },
 }

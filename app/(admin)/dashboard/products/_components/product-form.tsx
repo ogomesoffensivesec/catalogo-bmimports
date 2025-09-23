@@ -63,6 +63,7 @@ export function ProductForm({
   initialImages?: ImageItem[]
 }) {
   const router = useRouter()
+  const initialVariant = initial?.variant
 
   // ⬇️ guarde o objeto form (precisamos dele para <Form {...form}> e para o MoneyInput)
   const form = useForm<ProductFormValues>({
@@ -71,7 +72,7 @@ export function ProductForm({
       sku: initial?.sku ?? "",
       name: initial?.name ?? "",
       slug: initial?.slug ?? "",
-      variant: (initial?.variant as any) ?? "imported",
+      variant: initialVariant === "ready" || initialVariant === "imported" ? initialVariant : "imported",
       price: Number(initial?.price ?? 0),
       active: initial?.active ?? true,
       featured: initial?.featured ?? false,

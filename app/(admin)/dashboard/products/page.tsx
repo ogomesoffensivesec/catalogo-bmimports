@@ -14,6 +14,8 @@ import { toast } from "sonner"
 const fetcher = (url: string) => fetch(url).then(r => r.json())
 const PAGE_SIZE = 20
 
+
+
 export default function ProductsListPage() {
   const [q, setQ] = useState("")
   const [variant, setVariant] = useState<"imported" | "ready" | "">("")

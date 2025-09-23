@@ -5,6 +5,7 @@ import { useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { UploadCloud, Image as ImageIcon } from "lucide-react"
+import Image from "next/image"
 
 export type ImageItem = { url: string; alt?: string; position: number }
 
@@ -51,7 +52,7 @@ export function ImageUpload({
     const arr = [...value]
     const j = idx + dir
     if (j < 0 || j >= arr.length) return
-    ;[arr[idx], arr[j]] = [arr[j], arr[idx]]
+      ;[arr[idx], arr[j]] = [arr[j], arr[idx]]
     onChange(arr.map((im, i) => ({ ...im, position: i })))
   }
 
@@ -100,9 +101,16 @@ export function ImageUpload({
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {value.map((im, idx) => (
             <div key={idx} className="rounded-lg border border-border bg-card p-2">
-              <div className="aspect-video w-full overflow-hidden rounded-md bg-muted">
+              <div className="aspect-video w-full overflow-hidden rounded-md bg-muted relative">
                 {im.url ? (
-                  <img src={im.url} className="size-full object-cover" alt={im.alt || `Imagem ${idx + 1}`} />
+                  <Image
+                    src={im.url}
+                    alt={im.alt || `Imagem ${idx + 1}`}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                    className="object-cover"
+               
+                  />
                 ) : (
                   <div className="flex size-full items-center justify-center text-muted-foreground">
                     <ImageIcon className="size-5" />
