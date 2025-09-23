@@ -7,7 +7,7 @@ import { safeJson } from "@/lib/safe-json"
 
 async function guard() {
   const session = await getServerSession(authOptions)
-  if (!session || (session as any).user.role !== "marketing") return false
+  if (!session) return false
   return true
 }
 

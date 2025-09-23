@@ -74,9 +74,8 @@ export default withAuth(
 // ——— escopo do middleware ————————————————————————————————————————
 export const config = {
   matcher: [
-    "/api/public/:path*",   // CORS
-    "/api/admin/:path*",    // protegido por auth
-    "/dashboard/:path*",    // protegido por auth
-    "/api/auth/:path*",     // deixar passar NextAuth
+    "/dashboard/:path*",   // páginas privadas (NextAuth vai redirecionar/401)
+    "/api/public/:path*",  // CORS público
+    "/api/auth/:path*",    // deixa passar NextAuth
   ],
 }
