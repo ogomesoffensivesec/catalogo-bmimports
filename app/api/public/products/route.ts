@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma"
+import { safeJson } from "@/lib/safe-json"
 import { NextRequest, NextResponse } from "next/server"
 
 // GET /api/products?variant=imported|ready
@@ -14,5 +15,5 @@ export async function GET(req: NextRequest) {
     include: { images: { orderBy: { position: "asc" } } }
   })
   // cache curto (se quiser)
-  return NextResponse.json(products, { headers: { "Cache-Control": "s-maxage=60, stale-while-revalidate=300" } })
+  return safeJson(products, { headers: { "Cache-Control": "s-maxage=60, stale-while-revalidate=300" } })
 }
