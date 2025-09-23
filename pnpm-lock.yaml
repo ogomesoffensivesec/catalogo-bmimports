@@ -77,9 +77,6 @@ importers:
       next-themes:
         specifier: ^0.4.6
         version: 0.4.6(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
-      nodemailer:
-        specifier: ^6.10.1
-        version: 6.10.1
       prisma:
         specifier: ^6.16.2
         version: 6.16.2(typescript@5.9.2)
@@ -95,9 +92,6 @@ importers:
       recharts:
         specifier: ^3.2.1
         version: 3.2.1(@types/react@19.1.13)(react-dom@19.1.0(react@19.1.0))(react-is@16.13.1)(react@19.1.0)(redux@5.0.1)
-      resend:
-        specifier: ^6.1.0
-        version: 6.1.0
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
@@ -2999,15 +2993,6 @@ packages:
 
   reselect@5.1.1:
     resolution: {integrity: sha512-K/BG6eIky/SBpzfHZv/dd+9JBFiS4SWV7FIujVyJRux6e45+73RaUHXLmIR1f7WOMaQ0U1km6qwklRQxpJJY0w==}
-
-  resend@6.1.0:
-    resolution: {integrity: sha512-H0cJI2pcLk5/dGwyvZUHu+O7X/q6arvc40EWm+pRPuy+PSWojH5utZtmDBUZ2L0+gVwYZiWs6y2lw6GQA1z1rg==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      '@react-email/render': ^1.1.0
-    peerDependenciesMeta:
-      '@react-email/render':
-        optional: true
 
   resolve-from@4.0.0:
     resolution: {integrity: sha512-pb/MYmXstAkysRFx8piNI1tGFNQIFA3vkE3Gq4EuA1dF6gHp/+vgZqsCGJapvy8N3Q+4o7FwvquPJcnZ7RYy4g==}
@@ -6278,7 +6263,8 @@ snapshots:
 
   node-gyp-build@4.8.4: {}
 
-  nodemailer@6.10.1: {}
+  nodemailer@6.10.1:
+    optional: true
 
   nypm@0.6.2:
     dependencies:
@@ -6553,8 +6539,6 @@ snapshots:
       set-function-name: 2.0.2
 
   reselect@5.1.1: {}
-
-  resend@6.1.0: {}
 
   resolve-from@4.0.0: {}
 
