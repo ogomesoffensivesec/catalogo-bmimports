@@ -81,7 +81,7 @@ export function ImageUpload({
           ref={inputRef}
           type="file"
           multiple
-          accept="image/*"
+          accept="image/jpeg, image/png"
           className="hidden"
           onChange={(e) => uploadFiles(e.target.files)}
         />
@@ -92,7 +92,7 @@ export function ImageUpload({
           <span className="font-medium">Clique para enviar</span> ou arraste as imagens aqui
         </div>
         <div className="mt-1 text-xs text-muted-foreground">
-          PNG, JPG, WEBP — até alguns MB cada. {loading && "Enviando…"}
+          PNG, JPG, JFIF — até alguns MB cada. {loading && "Enviando…"}
         </div>
       </div>
 
