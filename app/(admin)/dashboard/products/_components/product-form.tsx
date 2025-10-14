@@ -1,20 +1,18 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useForm, Controller, type SubmitHandler } from "react-hook-form"
-import { z } from "zod"
-import { typedZodResolver } from "@/lib/typed-zod-resolver"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Separator } from "@/components/ui/separator"
-import { ImageUpload, type ImageItem } from "@/components/admin/image-upload"
-
-// ⬇️ importe o Form (provider) e helpers do shadcn
+import * as React from "react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useForm, Controller, type SubmitHandler } from "react-hook-form";
+import { z } from "zod";
+import { typedZodResolver } from "@/lib/typed-zod-resolver";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { ImageUpload, type ImageItem } from "@/components/admin/image-upload";
 import {
   Form,
   FormField,
@@ -22,20 +20,16 @@ import {
   FormLabel,
   FormControl,
   FormMessage,
-} from "@/components/ui/form"
-
-// ⬇️ Select do shadcn
+} from "@/components/ui/form";
 import {
   Select,
   SelectTrigger,
   SelectValue,
   SelectContent,
   SelectItem,
-} from "@/components/ui/select"
-
-// ⬇️ seu MoneyInput
-import MoneyInput from "@/components/money-input" 
-// se você salvou em "@/components/inputs/money-input", ajuste o import acima
+} from "@/components/ui/select";
+import MoneyInput from "@/components/money-input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const ProductSchema = z.object({
   sku: z.string().min(1),
@@ -43,14 +37,20 @@ const ProductSchema = z.object({
   slug: z.string().min(1),
   variant: z.enum(["imported", "ready"]),
   price: z.coerce.number().nonnegative(),
+  showPrice: z.boolean().default(true),
   active: z.boolean().default(true),
   featured: z.boolean().default(false),
   description: z.string().optional(),
-})
-export type ProductFormValues = z.infer<typeof ProductSchema>
+});
+export type ProductFormValues = z.infer<typeof ProductSchema>;
 
 function slugify(s: string) {
-  return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "")
+  return s
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
 }
 
 export function ProductForm({
@@ -58,69 +58,99 @@ export function ProductForm({
   initial,
   initialImages,
 }: {
-  mode: "create" | "edit"
-  initial?: Partial<ProductFormValues> & { id?: number }
-  initialImages?: ImageItem[]
+  mode: "create" | "edit";
+  initial?: Partial<ProductFormValues> & { id?: number };
+  initialImages?: ImageItem[];
 }) {
-  const router = useRouter()
-  const initialVariant = initial?.variant
+  const router = useRouter();
+  const initialVariant = initial?.variant;
 
-  // ⬇️ guarde o objeto form (precisamos dele para <Form {...form}> e para o MoneyInput)
   const form = useForm<ProductFormValues>({
     resolver: typedZodResolver<ProductFormValues>(ProductSchema),
     defaultValues: {
       sku: initial?.sku ?? "",
       name: initial?.name ?? "",
       slug: initial?.slug ?? "",
-      variant: initialVariant === "ready" || initialVariant === "imported" ? initialVariant : "imported",
+      variant:
+        initialVariant === "ready" || initialVariant === "imported"
+          ? initialVariant
+          : "imported",
       price: Number(initial?.price ?? 0),
+      showPrice: initial?.showPrice ?? true,
       active: initial?.active ?? true,
       featured: initial?.featured ?? false,
       description: initial?.description ?? "",
     },
-  })
+  });
 
-  // ⬇️ desestruture se quiser (opcional)
-  const { register, handleSubmit, watch, control, setValue, formState: { isSubmitting } } = form
+  const {
+    register,
+    handleSubmit,
+    watch,
+    control,
+    setValue,
+    formState: { isSubmitting },
+  } = form;
 
-  const name = watch("name")
+  const name = watch("name");
   useEffect(() => {
-    if (!initial?.slug) setValue("slug", slugify(name || ""))
-  }, [name, initial?.slug, setValue])
+    if (!initial?.slug) setValue("slug", slugify(name || ""));
+  }, [name, initial?.slug, setValue]);
 
-  const [images, setImages] = React.useState<ImageItem[]>(initialImages || [])
+  const [images, setImages] = React.useState<ImageItem[]>(initialImages || []);
 
   const onSubmit: SubmitHandler<ProductFormValues> = async (values) => {
-    const payload = { ...values, images }
-    const url = mode === "create" ? "/api/admin/products" : `/api/admin/products/${initial?.id}`
-    const method = mode === "create" ? "POST" : "PUT"
-    const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) })
-    if (!res.ok) { alert("Erro ao salvar"); return }
-    router.push("/dashboard/products")
-  }
+    const payload = { ...values, images };
+    const url =
+      mode === "create"
+        ? "/api/admin/products"
+        : `/api/admin/products/${initial?.id}`;
+    const method = mode === "create" ? "POST" : "PUT";
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      alert("Erro ao salvar");
+      return;
+    }
+    router.push("/dashboard/products");
+  };
 
   return (
-    // ⬇️ ENVOLVA o form inteiro com <Form {...form}> para fornecer o RHF context
     <Form {...form}>
-      <form className="grid gap-6 lg:grid-cols-3" onSubmit={handleSubmit(onSubmit)}>
+      <form
+        className="grid gap-6 lg:grid-cols-3"
+        onSubmit={handleSubmit(onSubmit)}
+        key={initial?.id ?? "create"}
+      >
         <div className="lg:col-span-2 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1">
               <Label>SKU</Label>
-              <Input {...register("sku")} className="bg-neutral-950 border-neutral-800" />
+              <Input
+                {...register("sku")}
+                className="bg-neutral-950 border-neutral-800"
+              />
             </div>
 
             <div className="space-y-1">
               <Label>Nome</Label>
-              <Input {...register("name")} className="bg-neutral-950 border-neutral-800" />
+              <Input
+                {...register("name")}
+                className="bg-neutral-950 border-neutral-800"
+              />
             </div>
 
             <div className="space-y-1">
               <Label>Slug</Label>
-              <Input {...register("slug")} className="bg-neutral-950 border-neutral-800" />
+              <Input
+                {...register("slug")}
+                className="bg-neutral-950 border-neutral-800"
+              />
             </div>
 
-            {/* ⬇️ Select do shadcn no lugar do <select> nativo */}
             <FormField
               control={control}
               name="variant"
@@ -143,7 +173,6 @@ export function ProductForm({
               )}
             />
 
-            {/* ⬇️ MoneyInput (usa FormField por dentro – agora vai funcionar) */}
             <MoneyInput
               form={form}
               name="price"
@@ -151,9 +180,48 @@ export function ProductForm({
               placeholder="R$ 0,00"
             />
 
+            <FormField
+              control={control}
+              name="showPrice" 
+              render={({ field }) => (
+                <FormItem className="grid gap-2">
+                  <FormLabel>Mostrar preço?</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={(value) => field.onChange(value === "sim")}
+                      value={field.value ? "sim" : "nao"}
+                      className="flex flex-row gap-4"
+                    >
+                      <FormItem className="flex items-center space-x-2">
+                        <FormControl>
+                          <RadioGroupItem value="sim" id="r-sim" />
+                        </FormControl>
+                        <FormLabel htmlFor="r-sim" className="font-normal">
+                          Sim
+                        </FormLabel>
+                      </FormItem>
+                      <FormItem className="flex items-center space-x-2">
+                        <FormControl>
+                          <RadioGroupItem value="nao" id="r-nao" />
+                        </FormControl>
+                        <FormLabel htmlFor="r-nao" className="font-normal">
+                          Não
+                        </FormLabel>
+                      </FormItem>
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <div className="sm:col-span-2 space-y-1">
               <Label>Descrição</Label>
-              <Textarea rows={5} {...register("description")} className="bg-neutral-950 border-neutral-800" />
+              <Textarea
+                rows={5}
+                {...register("description")}
+                className="bg-neutral-950 border-neutral-800"
+              />
             </div>
           </div>
 
@@ -166,7 +234,10 @@ export function ProductForm({
                 control={control}
                 render={({ field }) => (
                   <>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
                     <Label>Ativo</Label>
                   </>
                 )}
@@ -179,7 +250,10 @@ export function ProductForm({
                 control={control}
                 render={({ field }) => (
                   <>
-                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
                     <Label>Destaque</Label>
                   </>
                 )}
@@ -205,5 +279,5 @@ export function ProductForm({
         </div>
       </form>
     </Form>
-  )
+  );
 }

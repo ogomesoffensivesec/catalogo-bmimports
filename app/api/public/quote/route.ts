@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
         quoteId: Number(q.id),
         sku: it.sku,
         name: it.name,
-        price: it.price,
+        price: String(it.price),
         qty: it.qty,
         image: it.image ?? null,
         position: idx,

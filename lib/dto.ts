@@ -5,6 +5,7 @@ export const productCreateSchema = z.object({
   slug: z.string().min(1),
   variant: z.enum(["imported","ready"]),
   price: z.coerce.number().nonnegative(),
+  showPrice: z.boolean().default(true),
   description: z.string().optional(),
   active: z.boolean().default(true),
   featured: z.boolean().default(false),
