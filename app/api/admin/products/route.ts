@@ -3,10 +3,14 @@ import { prisma } from "@/lib/prisma"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { safeJson } from "@/lib/safe-json"
+import { cookies } from "next/headers"
 
 export async function POST(req: NextRequest) {
-  const session = await getServerSession(authOptions)
-  if (!session) return NextResponse.json({ error: "unauthorized" }, { status: 401 })
+  const cookieStore = await cookies()
+
+  if (!cookieStore.get("next-auth.session-token") && !cookieStore.get("next-auth.callback-url")) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
 
   const body = await req.json()
   const { images = [], ...data } = body as any

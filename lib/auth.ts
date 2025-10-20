@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials"
 import type { JWT } from "next-auth/jwt"
 import { prisma } from "./prisma"
 import bcrypt from "bcrypt"
+import NextAuth from "next-auth"
 
 declare module "next-auth" {
   interface Session {

@@ -27,6 +27,33 @@ model User {
   sessions Session[]
 }
 
+model Client {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  cpf       String?  @unique
+  tel       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts Account[]
+  sessions Session[]
+  address   Address[]
+}
+
+model Address {
+  id           String  @id @default(cuid())
+  street       String
+  streetNumber Int
+  city         String?
+  state        String?
+  zipcode      String?
+  country      String?
+  clientId     String
+
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+}
+
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -40,8 +67,10 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
+  clientId          String
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -51,7 +80,10 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clientId     String
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  client Client @relation(fields: [clientId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
@@ -70,7 +102,7 @@ model Product {
   description    String?
   variant        Variant
   price          Decimal           @db.Decimal(12, 2)
-  showPrice      Boolean           @default(true)
+  showPrice      Boolean           @default(false)
   active         Boolean           @default(true)
   featured       Boolean           @default(false)
   orderIndex     Int               @default(0)
@@ -131,8 +163,8 @@ model QuoteItem {
   price     Decimal @db.Decimal(12, 2)
   qty       Int     @default(1)
 
-  image     String?
-  position  Int?
+  image    String?
+  position Int?
 
   quote   Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
   product Product? @relation(fields: [productId], references: [id])

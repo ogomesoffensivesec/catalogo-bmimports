@@ -76,7 +76,7 @@ export function ProductForm({
           ? initialVariant
           : "imported",
       price: Number(initial?.price ?? 0),
-      showPrice: initial?.showPrice ?? true,
+      showPrice: initial?.showPrice,
       active: initial?.active ?? true,
       featured: initial?.featured ?? false,
       description: initial?.description ?? "",

@@ -1,12 +1,13 @@
 "use client"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Package, QuoteIcon as Quote, LayoutDashboard } from "lucide-react"
+import { Package, QuoteIcon as Quote, LayoutDashboard, User } from "lucide-react"
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/products", label: "Produtos", icon: Package },
   { href: "/dashboard/quotes", label: "Orçamentos", icon: Quote },
+  { href: "/client", label: "Clientes", icon: User },
 ]
 
 export function Sidebar() {
