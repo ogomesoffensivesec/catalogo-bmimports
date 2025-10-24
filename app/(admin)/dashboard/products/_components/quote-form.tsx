@@ -51,7 +51,7 @@ const QuoteSchema = z.object({
 });
 export type QuoteFormValues = z.infer<typeof QuoteSchema>;
 
-type Client = { id: string; name: string };
+type Client = { id: string; name: string, email: string; tel: string };
 type Product = { id: number; name: string; sku: string; price: number };
 
 const fetcher = (url: string) =>
