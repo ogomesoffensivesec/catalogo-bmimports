@@ -76,7 +76,7 @@ export function ProductForm({
           ? initialVariant
           : "imported",
       price: Number(initial?.price ?? 0),
-      showPrice: initial?.showPrice,
+      showPrice: String(initial?.showPrice) === "true",
       active: initial?.active ?? true,
       featured: initial?.featured ?? false,
       description: initial?.description ?? "",
@@ -101,6 +101,7 @@ export function ProductForm({
 
   const onSubmit: SubmitHandler<ProductFormValues> = async (values) => {
     const payload = { ...values, images };
+    console.log("payload", payload);
     const url =
       mode === "create"
         ? "/api/admin/products"
@@ -115,6 +116,8 @@ export function ProductForm({
       alert("Erro ao salvar");
       return;
     }
+    router.refresh();
+
     router.push("/dashboard/products");
   };
 
@@ -188,7 +191,9 @@ export function ProductForm({
                   <FormLabel>Mostrar preço?</FormLabel>
                   <FormControl>
                     <RadioGroup
-                      onValueChange={(value) => field.onChange(value === "sim")}
+                      onValueChange={(value) => {field.onChange(value === "sim");
+                        console.log("value", value)}
+                      }
                       value={field.value ? "sim" : "nao"}
                       className="flex flex-row gap-4"
                     >

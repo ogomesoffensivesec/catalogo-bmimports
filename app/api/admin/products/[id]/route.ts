@@ -13,7 +13,7 @@ export async function GET(
   const cookieStore = await cookies();
 
   if (!cookieStore.get(process.env.AUTH_COOKIE) && !cookieStore.get(process.env.AUTH_CALLBACK_URL) && !cookieStore.get(process.env.AUTH_CSRF_TOKEN)) {
-    return NextResponse.json({ error: "unauthorized", message: "dpiawbndoianbwdawd" }, { status: 401 });
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const product = await prisma.product.findUnique({
     where: { id: BigInt(params.id) },
@@ -26,25 +26,28 @@ export async function PUT(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
+  try {
   const cookieStore = await cookies();
 
   if (
-    !cookieStore.get("next-auth.session-token") &&
-    !cookieStore.get("next-auth.callback-url")
-  ) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+      !cookieStore.get(process.env.AUTH_COOKIE) &&
+      !cookieStore.get(process.env.AUTH_CALLBACK_URL) &&
+      !cookieStore.get(process.env.AUTH_CSRF_TOKEN)
+    ) {
+      return NextResponse.json(
+        { error: "unauthorized" },
+        { status: 401 }
+      );
+    }
   const json = await req.json();
   const parsed = productCreateSchema.partial().safeParse(json);
-  if (!parsed.success)
-    return NextResponse.json(
-      { error: parsed.error.flatten() },
-      { status: 400 }
-    );
+  if (!parsed.success) throw new Error(parsed.error.flatten().toString());
 
   const { images, ...data } = parsed.data;
+  console.log("data", data)
   const id = BigInt(params.id);
-  await prisma.product.update({ where: { id }, data });
+  
+    await prisma.product.update({ where: { id }, data });
   if (images) {
     await prisma.productImage.deleteMany({ where: { productId: id } });
     if (images.length) {
@@ -59,6 +62,14 @@ export async function PUT(
     }
   }
   return safeJson({ ok: true });
+  } catch (error) {
+    console.log("ERRO NA ROTA PUT:", error);
+    return NextResponse.json(
+      { error: "Erro interno do servidor." },
+      { status: 500 }
+    );
+  }
+  
 }
 
 export async function DELETE(
@@ -68,11 +79,15 @@ export async function DELETE(
   const cookieStore = await cookies();
 
   if (
-    !cookieStore.get("next-auth.session-token") &&
-    !cookieStore.get("next-auth.callback-url")
-  ) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+      !cookieStore.get(process.env.AUTH_COOKIE) &&
+      !cookieStore.get(process.env.AUTH_CALLBACK_URL) &&
+      !cookieStore.get(process.env.AUTH_CSRF_TOKEN)
+    ) {
+      return NextResponse.json(
+        { error: "unauthorized" },
+        { status: 401 }
+      );
+    }
   await prisma.product.delete({ where: { id: BigInt(params.id) } });
   return safeJson({ ok: true });
 }

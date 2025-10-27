@@ -35,7 +35,7 @@ export async function PUT(
       !cookieStore.get(process.env.AUTH_CSRF_TOKEN)
     ) {
       return NextResponse.json(
-        { error: "unauthorized", message: "dpiawbndoianbwdawd" },
+        { error: "unauthorized" },
         { status: 401 }
       );
     }
@@ -94,10 +94,14 @@ export async function DELETE(
     const cookieStore = await cookies();
 
     if (
-      !cookieStore.get("next-auth.session-token") &&
-      !cookieStore.get("next-auth.callback-url")
+      !cookieStore.get(process.env.AUTH_COOKIE) &&
+      !cookieStore.get(process.env.AUTH_CALLBACK_URL) &&
+      !cookieStore.get(process.env.AUTH_CSRF_TOKEN)
     ) {
-      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "unauthorized" },
+        { status: 401 }
+      );
     }
     const { id } = params;
 
@@ -130,11 +134,15 @@ export async function GET(
   const cookieStore = await cookies();
 
   if (
-    !cookieStore.get("next-auth.session-token") &&
-    !cookieStore.get("next-auth.callback-url")
-  ) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+      !cookieStore.get(process.env.AUTH_COOKIE) &&
+      !cookieStore.get(process.env.AUTH_CALLBACK_URL) &&
+      !cookieStore.get(process.env.AUTH_CSRF_TOKEN)
+    ) {
+      return NextResponse.json(
+        { error: "unauthorized" },
+        { status: 401 }
+      );
+    }
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
