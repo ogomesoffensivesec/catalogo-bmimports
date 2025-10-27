@@ -8,8 +8,7 @@ import { cookies } from "next/headers";
 export async function GET(req: NextRequest) {
   const cookieStore = await cookies()
 
-  if (!cookieStore.get("next-auth.session-token") && !cookieStore.get("next-auth.callback-url")) {
-    console.log("TESTE")
+  if (!cookieStore.get(process.env.AUTH_COOKIE) && !cookieStore.get(process.env.AUTH_CALLBACK_URL) && !cookieStore.get(process.env.AUTH_CSRF_TOKEN)) {
     return NextResponse.json({ error: "unauthorized", message: "dpiawbndoianbwdawd" }, { status: 401 });
   }
   const { searchParams } = new URL(req.url);

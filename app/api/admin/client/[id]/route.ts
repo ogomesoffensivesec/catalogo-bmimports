@@ -27,46 +27,54 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const cookieStore = await cookies()
-    
-      if (!cookieStore.get("next-auth.session-token") && !cookieStore.get("next-auth.callback-url")) {
-        return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-      }
+    const cookieStore = await cookies();
+
+    if (
+      !cookieStore.get(process.env.AUTH_COOKIE) &&
+      !cookieStore.get(process.env.AUTH_CALLBACK_URL) &&
+      !cookieStore.get(process.env.AUTH_CSRF_TOKEN)
+    ) {
+      return NextResponse.json(
+        { error: "unauthorized", message: "dpiawbndoianbwdawd" },
+        { status: 401 }
+      );
+    }
     const { id } = params;
     const body = await req.json();
 
     const parsed = ClientSchema.partial().safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+      return NextResponse.json(
+        { error: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
 
     const { address, ...clientData } = parsed.data;
 
     const updatedClient = await prisma.$transaction(async (prisma) => {
-      
       const client = await prisma.client.update({
         where: { id },
         data: clientData,
       });
-    
+
       await prisma.address.deleteMany({ where: { clientId: id } });
-    
-      if (address && Object.values(address).some(val => val)) {
+
+      if (address && Object.values(address).some((val) => val)) {
         await prisma.address.create({
           data: {
             ...address,
             client: {
               connect: {
-                id: id, 
+                id: id,
               },
-            }, 
+            },
           },
         });
       }
-    
+
       return client;
-      
-    })
+    });
 
     return NextResponse.json(updatedClient);
   } catch (error) {
@@ -83,11 +91,14 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const cookieStore = await cookies()
+    const cookieStore = await cookies();
 
-  if (!cookieStore.get("next-auth.session-token") && !cookieStore.get("next-auth.callback-url")) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-  }
+    if (
+      !cookieStore.get("next-auth.session-token") &&
+      !cookieStore.get("next-auth.callback-url")
+    ) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
     const { id } = params;
 
     if (!id) {
@@ -116,11 +127,14 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   const { id } = params;
-  const cookieStore = await cookies()
-  
-    if (!cookieStore.get("next-auth.session-token") && !cookieStore.get("next-auth.callback-url")) {
-      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-    }
+  const cookieStore = await cookies();
+
+  if (
+    !cookieStore.get("next-auth.session-token") &&
+    !cookieStore.get("next-auth.callback-url")
+  ) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
