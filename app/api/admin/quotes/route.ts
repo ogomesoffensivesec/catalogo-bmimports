@@ -9,6 +9,7 @@ export async function GET(req: NextRequest) {
   const cookieStore = await cookies()
 
   if (!cookieStore.get("next-auth.session-token") && !cookieStore.get("next-auth.callback-url")) {
+    console.log("TESTE")
     return NextResponse.json({ error: "unauthorized", message: "dpiawbndoianbwdawd" }, { status: 401 });
   }
   const { searchParams } = new URL(req.url);
